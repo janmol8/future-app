@@ -2206,12 +2206,21 @@ def start_market_runtime():
     market_runtime.start()
 
 if __name__ == "__main__":
-    host = os.getenv("APP_HOST", "127.0.0.1")
+    host = os.getenv("APP_HOST", "0.0.0.0")
     port = int(os.getenv("PORT", os.getenv("APP_PORT", "5000")))
+    # Vercel containers may run as non-root and cannot bind to privileged ports (<1024).
+    # If PORT is set to a privileged port, fall back to 5000 and log clearly.
+    if port < 1024:
+        logger.warning("PORT=%d is a privileged port; non-root containers cannot bind. Falling back to 5000.", port)
+        port = 5000
     requested_debug = os.getenv("FLASK_DEBUG", "").lower() in {"1", "true", "yes", "on"}
     local_hosts = {"127.0.0.1", "localhost", "::1"}
     debug = requested_debug and host in local_hosts
     if requested_debug and not debug:
         logger.warning("Refusing to enable Flask debug mode on non-local host %s", host)
     start_market_runtime()
-    app.run(host=host, port=port, debug=debug, threaded=True)
+    try:
+        app.run(host=host, port=port, debug=debug, threaded=True)
+    except OSError as exc:
+        logger.error("Failed to bind to %s:%d: %s", host, port, exc)
+        raise

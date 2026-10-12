@@ -5,6 +5,7 @@
     "FLASK_SECRET_KEY": "dev-do-not-use-in-prod",
     "APP_HOST": "0.0.0.0",
     "APP_PORT": "5000",
+    "PORT": "5000",
     "LOG_LEVEL": "INFO",
     "FUTURE_APP_DATA_DIR": "data",
     "DATABASE_URL": "sqlite:///data/future_app.sqlite3",
