@@ -1561,18 +1561,19 @@ def api_stream():
                         else:
                             ohlc_fields = {}  # intraday: let frontend track from price extremes
 
-                        yield f"data: {json.dumps({
-                            'type': 'tick', 
-                            'symbol': symbol, 
-                            'price': round(price, 2), 
+                        _tick_payload = {
+                            'type': 'tick',
+                            'symbol': symbol,
+                            'price': round(price, 2),
                             **ohlc_fields,
-                            'volume': quote.get('volume', 0), 
-                            'timestamp': ts, 
-                            'timeRounded': ts_rounded, 
+                            'volume': quote.get('volume', 0),
+                            'timestamp': ts,
+                            'timeRounded': ts_rounded,
                             'prevClose': prev_close,
                             'is_open': quote.get('is_open', True),
-                            'session': session
-                        })}\n\n"
+                            'session': session,
+                        }
+                        yield 'data: ' + json.dumps(_tick_payload) + '\n\n'
                 
                 time.sleep(0.1)  # tight loop — poller handles NSE rate
             except GeneratorExit:
