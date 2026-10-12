@@ -1,0 +1,16 @@
+.git
+.vercel
+.startup
+.pytest_cache
+.env*
+backend/.env
+**/__pycache__
+*.pyc
+*.log
+*.zip
+node_modules
+nextjs_app
+backend/venv
+backend/data
+backend/yf_cache
+backend/trade_log.txt

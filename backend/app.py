@@ -2207,25 +2207,28 @@ def start_market_runtime():
 
 if __name__ == "__main__":
     host = os.getenv("APP_HOST", "0.0.0.0")
-    port = int(os.getenv("PORT", os.getenv("APP_PORT", "5000")))
-    if port < 1024:
-        logger.warning("PORT=%d is privileged; non-root containers cannot bind. Falling back to 5000.", port)
-        port = 5000
+    # Hosts such as Vercel inject PORT and route traffic to exactly that port,
+    # so it must be honoured as-is (never remapped).
+    port = int(os.getenv("PORT") or os.getenv("APP_PORT") or "5000")
     requested_debug = os.getenv("FLASK_DEBUG", "").lower() in {"1", "true", "yes", "on"}
     local_hosts = {"127.0.0.1", "localhost", "::1"}
     debug = requested_debug and host in local_hosts
     if requested_debug and not debug:
         logger.warning("Refusing to enable Flask debug mode on non-local host %s", host)
-    start_market_runtime()
-    if host in local_hosts and debug:
-        # Local development: Flask dev server with reloader.
-        app.run(host=host, port=port, debug=True, threaded=True)
-    else:
-        # Production (Vercel containers, VPS, etc.): use Waitress.
+
+    # Start the market runtime in the background. It makes network calls
+    # (NSE calendar etc.) that can take a long time or hang on datacenter IPs;
+    # doing that BEFORE binding the port makes the host think the server is dead.
+    def _bg_start():
         try:
-            from waitress import serve
-        except ImportError:
-            logger.error("waitress not installed; install it with: pip install waitress")
-            sys.exit(1)
-        logger.info("Starting Waitress WSGI server on %s:%d", host, port)
-        serve(app, host=host, port=port, threads=4, channels=4)
+            start_market_runtime()
+        except Exception:  # noqa: BLE001
+            logger.exception("market runtime failed to start")
+    threading.Thread(target=_bg_start, name="market-runtime-start", daemon=True).start()
+
+    logger.info("Listening on %s:%d", host, port)
+    try:
+        from waitress import serve
+        serve(app, host=host, port=port, threads=16)
+    except ImportError:
+        app.run(host=host, port=port, debug=debug, threaded=True, use_reloader=False)

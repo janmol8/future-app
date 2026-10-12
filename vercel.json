@@ -1,33 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "env": {
-    "FLASK_DEBUG": "0",
-    "FLASK_SECRET_KEY": "dev-do-not-use-in-prod",
-    "APP_HOST": "0.0.0.0",
-    "APP_PORT": "5000",
-    "PORT": "5000",
-    "LOG_LEVEL": "INFO",
-    "FUTURE_APP_DATA_DIR": "data",
-    "DATABASE_URL": "sqlite:///data/future_app.sqlite3",
-    "GEMINI_API_KEY": "",
-    "GEMINI_MODEL": "gemini-1.5-flash",
-    "ANTHROPIC_API_KEY": "",
-    "ANTHROPIC_MODEL": "claude-sonnet-4-20250514",
-    "SMTP_HOST": "smtp.gmail.com",
-    "SMTP_PORT": "587",
-    "SMTP_USER": "",
-    "SMTP_PASS": ""
-  },
-  "routes": [
-    { "src": "/(.*)", "dest": "backend/app.py" }
-  ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
         { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "Cache-Control", "value": "no-store" }
+        { "key": "X-Frame-Options", "value": "DENY" }
       ]
     }
   ]

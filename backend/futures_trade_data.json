@@ -18,322 +18,6 @@
             "journal_entries": [],
             "equity_curve": [
                 {
-                    "timestamp": 1790793795,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790793855,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790793915,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790793975,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790794035,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790794095,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790794155,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790794215,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790794275,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790794335,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790794395,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790794455,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790794515,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790794575,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790794635,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790794695,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790794755,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790794815,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790794875,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790794935,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790794995,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790795055,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790795115,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790795175,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790795235,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790795295,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790795355,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790795415,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790795475,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790795536,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790795596,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790795656,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790795716,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790795776,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790795836,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790795896,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790795956,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790796016,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790796076,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790796136,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790796196,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790796256,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790796316,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790796376,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790796436,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790796496,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790796556,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790796616,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790796676,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790796736,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790796796,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790796856,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790796916,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790796976,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790797036,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790797096,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790797156,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790797216,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790797276,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790797336,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790797396,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790797456,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790797516,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790802211,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790802271,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790802331,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790802391,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790802451,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790802511,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790802571,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790802631,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790802692,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790802752,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790802812,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790802872,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790802932,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790802992,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790803052,
-                    "equity": 10000.0
-                },
-                {
-                    "timestamp": 1790803112,
-                    "equity": 10000.0
-                },
-                {
                     "timestamp": 1790803172,
                     "equity": 10000.0
                 },
@@ -5776,13 +5460,329 @@
                 {
                     "timestamp": 1791786352,
                     "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791786412,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791786472,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791786532,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791786592,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791786652,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791786712,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791786772,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791786832,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791786892,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791786952,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791787012,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791787072,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791787132,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791787192,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791787252,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791787312,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791787372,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791787432,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791787492,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791787552,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791787612,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791787672,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791787732,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791787792,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791787852,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791787912,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791787972,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791788032,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791788092,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791788152,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791788212,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791788272,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791788332,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791788392,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791788452,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791788512,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791788573,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791788633,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791788693,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791788753,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791788813,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791788873,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791788933,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791788993,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791789053,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791789113,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791789173,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791789233,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791789293,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791789353,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791789413,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791789473,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791789533,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791789593,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791789653,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791789713,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791789773,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791789833,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791789893,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791789953,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791790013,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791790073,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791790133,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791790193,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791790253,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791790313,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791790373,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791790433,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791790493,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791790553,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791790613,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791790673,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791790733,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791790793,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791790853,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791790913,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791790973,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791791033,
+                    "equity": 10000.0
+                },
+                {
+                    "timestamp": 1791791093,
+                    "equity": 10000.0
                 }
             ],
             "initial_balance": "10000",
             "leverage_settings": {},
             "margin_mode_settings": {},
             "hedge_mode": false,
-            "created_at": 1791786352.083406
+            "created_at": 1791791093.9632015
         }
     }
 }
