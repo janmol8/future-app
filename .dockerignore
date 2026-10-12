@@ -1,0 +1,11 @@
+node_modules
+frontend/node_modules
+nextjs_app/node_modules
+__pycache__
+*.pyc
+.pytest_cache
+.startup
+backend/.env
+backend/yf_cache
+backend/trade_log.txt
+*.zip

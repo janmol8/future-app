@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Security headers -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self' wss://stream.binance.com wss://streamer.nseindia.com; frame-ancestors 'none';" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <title>Future Chart - Education Simulator</title>
+  
+  <!-- Local Fonts & Styles -->
+  <link rel="stylesheet" href="css/fonts.css" />
+  <link rel="stylesheet" href="css/style.css?v=11" />
+  <link rel="stylesheet" href="css/all.min.css" />
+  <link rel="stylesheet" href="css/market_ui.css?v=2" />
+  
+  <!-- Lightweight Charts (Local) -->
+  <script src="js/lightweight-charts.js"></script>
+  <script src="js/extended_hours/session_manager.js"></script>
+  
+  <style>
+    /* Premium Animations */
+    @keyframes flashGreen {
+        0% { color: var(--accent-green); text-shadow: 0 0 10px var(--accent-green); transform: scale(1.05); }
+        100% { color: var(--text-primary); text-shadow: none; transform: scale(1); }
+    }
+    @keyframes flashRed {
+        0% { color: var(--accent-red); text-shadow: 0 0 10px var(--accent-red); transform: scale(1.05); }
+        100% { color: var(--text-primary); text-shadow: none; transform: scale(1); }
+    }
+    @keyframes pulseGlow {
+        0% { box-shadow: 0 0 0 0 rgba(41, 121, 255, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(41, 121, 255, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(41, 121, 255, 0); }
+    }
+    @keyframes slideInRight {
+        from { transform: translateX(30px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes staggerFadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmerSweep {
+        0% { background-position: -200% center; }
+        100% { background-position: 200% center; }
+    }
+    @keyframes candleGrow {
+        0% { height: 0; opacity: 0; }
+        50% { opacity: 1; }
+        100% { height: var(--target-h); opacity: 0.8; }
+    }
+    .flash-up { animation: flashGreen 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .flash-down { animation: flashRed 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    
+    .stagger-item { animation: staggerFadeIn 0.3s ease forwards; opacity: 0; }
+    
+    #loading-screen {
+      position: fixed; inset: 0; z-index: 10000;
+      background: radial-gradient(circle at center, #0d0f14 0%, #050608 100%);
+      display: none; /* Changed: hidden by default */
+      flex-direction: column; align-items: center; justify-content: center;
+      transition: opacity 0.4s ease;
+    }
+    #loading-screen.active { display: flex; } /* Show only when active */
+    #loading-screen.hidden { opacity: 0 !important; pointer-events: none !important; }
+    
+    /* Chart Spinner Fix */
+    .chart-loading {
+        position: absolute; inset: 0; z-index: 80;
+        background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+        display: none; align-items: center; justify-content: center;
+    }
+    .chart-loading.active { display: flex; }
+    .spinner {
+        width: 40px; height: 40px; border: 4px solid rgba(41, 121, 255, 0.1);
+        border-top-color: var(--accent-blue); border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .load-candle { width: 8px; border-radius: 4px; animation: candleGrow 1s cubic-bezier(0.34, 1.56, 0.64, 1) infinite alternate; }
+    .load-candle:nth-child(1) { background: #FF1744; --target-h: 20px; animation-delay: 0s; }
+    .load-candle:nth-child(2) { background: #2979FF; --target-h: 40px; animation-delay: 0.2s; }
+    .load-candle:nth-child(3) { background: #00E676; --target-h: 60px; animation-delay: 0.4s; }
+    .load-text { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 16px; letter-spacing: 3px;
+                 background: linear-gradient(90deg, #fff, #2979FF, #fff); background-size: 200% auto;
+                 -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmerSweep 3s linear infinite;}
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="loading-candles">
+       <div class="load-candle"></div>
+       <div class="load-candle"></div>
+       <div class="load-candle"></div>
+    </div>
+    <div class="load-text">INITIALIZING TERMINAL</div>
+  </div>
+
+  <div class="app-container">
+    <!-- Premium Top Bar -->
+    <header class="top-bar">
+      <div class="logo">
+        <div class="logo-icon"><i class="fas fa-wave-square"></i></div>
+        <span class="logo-text">FUTURE <span style="color:var(--accent-blue)">CHART</span></span>
+      </div>
+
+      <div class="active-symbol-info" id="active-symbol-info">
+        <div class="asi-logo-container">
+          <img id="asi-logo" src="" alt="" style="display:none;" />
+          <div id="asi-icon-fallback" class="asi-icon"><i class="fas fa-building"></i></div>
+        </div>
+        <div class="asi-details">
+          <div class="asi-name" id="asi-name">---</div>
+          <div class="asi-type" id="asi-type">STOCK</div>
+        </div>
+      </div>
+
+      <div class="symbol-search-wrapper">
+        <input type="text" class="symbol-search-input" id="symbol-search" placeholder="Search Markets..." autocomplete="off" />
+        <i class="fas fa-search search-icon" style="position:absolute; right:15px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:12px;"></i>
+        <div class="search-dropdown" id="search-dropdown"></div>
+      </div>
+
+      <div class="quote-info">
+        <div class="price-timer-group">
+          <div class="quote-price" id="quote-price">—</div>
+          <div id="market-status" style="font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; margin-left: 8px; display: none; vertical-align: middle;"></div>
+        </div>
+        <div class="quote-change" id="quote-change">—</div>
+        <div id="ext-hours-badge" style="display:inline-block; vertical-align:middle; margin-left:6px;"></div>
+      </div>
+
+      <div class="top-bar-actions">
+        <button class="top-bar-btn" id="btn-theme-toggle" title="Toggle Theme"><i class="fas fa-moon"></i></button>
+        <button class="top-bar-btn" id="btn-screenshot" title="Screenshot" onclick="App.takeScreenshot()"><i class="fas fa-camera"></i></button>
+        <button class="top-bar-btn" id="btn-settings" title="Settings" onclick="App.showSettings()"><i class="fas fa-cog"></i></button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- Left Sidebar (Command Center) -->
+      <aside class="sidebar" id="main-sidebar">
+        <div class="sidebar-top">
+          <button class="sidebar-item active" data-tab="watchlist" title="Watchlist">
+            <i class="fas fa-list-ul"></i>
+            <span class="sidebar-label">Watchlist</span>
+          </button>
+          <button class="sidebar-item" data-tab="papertrade" title="Paper Trading">
+            <i class="fas fa-money-bill-trend-up"></i>
+            <span class="sidebar-label">Trade</span>
+          </button>
+          <button class="sidebar-item" data-tab="dashboard" title="Dashboard">
+            <i class="fas fa-th-large"></i>
+            <span class="sidebar-label">Analytics</span>
+          </button>
+          <button class="sidebar-item" data-tab="alerts" title="Alerts">
+            <i class="fas fa-bell"></i>
+            <span class="sidebar-label">Alerts</span>
+          </button>
+          <button class="sidebar-item" data-tab="indicators" title="Indicators">
+            <i class="fas fa-flask"></i>
+            <span class="sidebar-label">Indicators</span>
+          </button>
+          <button class="sidebar-item" data-tab="patterns" title="Patterns">
+            <i class="fas fa-project-diagram"></i>
+            <span class="sidebar-label">Patterns</span>
+          </button>
+          <button class="sidebar-item" data-tab="optionchain" title="Option Chain">
+            <i class="fas fa-layer-group"></i>
+            <span class="sidebar-label">Options</span>
+          </button>
+          <button class="sidebar-item" data-tab="learning" title="Student Lessons">
+            <i class="fas fa-graduation-cap"></i>
+            <span class="sidebar-label">Lessons</span>
+          </button>
+          <button class="sidebar-item" data-tab="strategy" title="Strategy Builder">
+            <i class="fas fa-magic"></i>
+            <span class="sidebar-label">Strategy</span>
+          </button>
+          <button class="sidebar-item" data-tab="market" title="Market Overview">
+            <i class="fas fa-gauge-high"></i>
+            <span class="sidebar-label">Market</span>
+          </button>
+          <button class="sidebar-item" data-tab="ipos" title="IPO Tracker">
+            <i class="fas fa-rocket"></i>
+            <span class="sidebar-label">IPOs</span>
+          </button>
+          <button class="sidebar-item" data-tab="screener" title="Stock Screener">
+            <i class="fas fa-filter"></i>
+            <span class="sidebar-label">Screener</span>
+          </button>
+          <button class="sidebar-item" data-tab="ai" title="Educational Model Lab">
+            <i class="fas fa-brain"></i>
+            <span class="sidebar-label">Model Lab</span>
+          </button>
+          <button class="sidebar-item" data-tab="account" title="Account and Upgrade">
+            <i class="fas fa-user-graduate"></i>
+            <span class="sidebar-label">Account</span>
+          </button>
+        </div>
+        <div class="sidebar-bottom">
+          <button class="sidebar-item" id="sidebar-toggle" title="Expand Sidebar">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Center (Hero Chart) -->
+      <main class="chart-stage">
+        <div class="education-disclaimer" style="padding:6px 12px; font-size:11px; line-height:1.35; color:var(--text-muted); border-bottom:1px solid var(--border-color); background:rgba(41,98,255,0.06);">
+          Educational simulator only. Virtual money, not investment advice, not SEBI-registered research. AI/model output is generated for learning and may be wrong.
+        </div>
+        <div class="timeframe-toolbar">
+          <button class="top-bar-btn" id="btn-toggle-drawing" title="Toggle Drawing Toolbar" style="margin-right:8px; width:32px;">
+            <i class="fas fa-edit"></i>
+          </button>
+          <div class="tf-separator"></div>
+          <div class="tf-selector-dropdown" id="tf-selector-dropdown">
+            <button class="tf-dropdown-toggle" id="tf-dropdown-toggle">
+              <i class="far fa-clock" style="margin-right:6px; font-size:12px; color:var(--accent-blue);"></i>
+              <span id="active-tf-label">1m</span>
+              <i class="fas fa-chevron-down" style="margin-left:8px; font-size:10px; opacity:0.5;"></i>
+            </button>
+            <div class="tf-dropdown-menu" id="tf-dropdown-menu">
+              <div class="tf-menu-section">Seconds</div>
+              <div class="tf-menu-grid">
+                <button class="tf-menu-item" data-interval="1s">1s</button>
+                <button class="tf-menu-item" data-interval="5s">5s</button>
+                <button class="tf-menu-item" data-interval="15s">15s</button>
+                <button class="tf-menu-item" data-interval="30s">30s</button>
+              </div>
+              <div class="tf-menu-section">Minutes</div>
+              <div class="tf-menu-grid">
+                <button class="tf-menu-item active" data-interval="1m">1m</button>
+                <button class="tf-menu-item" data-interval="3m">3m</button>
+                <button class="tf-menu-item" data-interval="5m">5m</button>
+                <button class="tf-menu-item" data-interval="15m">15m</button>
+                <button class="tf-menu-item" data-interval="30m">30m</button>
+                <button class="tf-menu-item" data-interval="45m">45m</button>
+              </div>
+              <div class="tf-menu-section">Hours & Days</div>
+              <div class="tf-menu-grid">
+                <button class="tf-menu-item" data-interval="1h">1H</button>
+                <button class="tf-menu-item" data-interval="4h">4H</button>
+                <button class="tf-menu-item" data-interval="1d">1D</button>
+                <button class="tf-menu-item" data-interval="1w">1W</button>
+                <button class="tf-menu-item" data-interval="1M">1M</button>
+              </div>
+              <div class="tf-menu-divider"></div>
+              <button class="tf-menu-item custom-trigger" id="btn-custom-tf-trigger">
+                <i class="fas fa-plus-circle" style="margin-right:6px;"></i> Custom Interval
+              </button>
+            </div>
+          </div>
+
+          <div id="custom-tf-input-wrapper" style="display:none; align-items:center; gap:4px; margin-left:8px; background: var(--bg-secondary); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--accent-blue);">
+            <input type="text" id="custom-tf-input" placeholder="e.g. 18m" style="width:60px; height:24px; background:transparent; border:none; color:white; font-size:12px; outline:none;" />
+            <button id="btn-apply-custom-tf" style="background:var(--accent-blue); color:white; border:none; padding:0 10px; height:24px; border-radius:4px; cursor:pointer; font-size:11px; font-weight:bold;">OK</button>
+          </div>
+
+          <div class="tf-separator"></div>
+          <span class="tf-label">TYPE</span>
+          <div class="chart-type-group">
+            <button class="chart-type-btn active" id="chart-type-candles" onclick="App.setChartType('candles')"><i class="fa-solid fa-chart-candlestick"></i><span>Candles</span></button>
+            <button class="chart-type-btn" id="chart-type-line" onclick="App.setChartType('line')"><i class="fa-solid fa-chart-line"></i><span>Line</span></button>
+          </div>
+          <div class="tf-separator"></div>
+          <div class="live-badge" id="live-badge"><span class="live-dot"></span><span>LIVE</span></div>
+          
+          <div class="tf-separator"></div>
+          <div class="layout-selector">
+            <button class="layout-btn" onclick="MultiChart.setLayout('1x1')" title="1 Chart"><span></span></button>
+            <button class="layout-btn" onclick="MultiChart.setLayout('2x1')" title="2 Charts"><span></span><span></span></button>
+            <button class="layout-btn" onclick="MultiChart.setLayout('2x2')" title="4 Charts"><span></span><span></span><span></span><span></span></button>
+          </div>
+        </div>
+
+          <div id="chart-stage-container">
+            <!-- Top Left Legend Container -->
+            <div id="legend-container" style="position:absolute; top:10px; left:10px; z-index:70; display:flex; flex-direction:column; gap:4px; pointer-events:none; max-width:500px;">
+                <div id="ohlc-legend" style="display:flex; gap:12px; font-weight:600; font-size:12px; color:var(--text-secondary); padding:2px 8px;"></div>
+                <div id="indicator-legend" class="indicator-legend" style="position:relative; top:0; left:0; padding-left:0;"></div>
+            </div>
+            
+            <!-- Quick Trade Button -->
+            <button id="btn-quick-trade" onclick="if(typeof PaperTrade !== 'undefined' && typeof App !== 'undefined') PaperTrade.openOrderModal(App.currentSymbol, null, App.currentSymbol, 'BUY')" 
+              style="position:absolute; bottom:60px; right:20px; z-index:100; 
+                     background: linear-gradient(135deg, #1B5E20, #26a69a);
+                     border:none; border-radius:24px; padding:10px 20px; color:white;
+                     font-weight:800; font-size:12px; cursor:pointer; letter-spacing:0.5px;
+                     box-shadow: 0 4px 20px rgba(38,166,154,0.4); transition:all 0.2s;">
+              💹 TRADE
+            </button>
+
+            <!-- Drawing Toolbar -->
+            <div class="drawing-toolbar">
+              <button class="dt-item" id="tool-cursor" title="Cursor" onclick="Drawing.setTool(null)"><i class="fas fa-mouse-pointer"></i></button>
+              <div class="dt-separator"></div>
+              <button class="dt-item" id="tool-trendline" title="Trendline" onclick="Drawing.setTool('trendline')"><i class="fas fa-slash"></i></button>
+              <button class="dt-item" id="tool-fib" title="Fibonacci" onclick="Drawing.setTool('fib')"><i class="fas fa-align-justify"></i></button>
+              <button class="dt-item" id="tool-avwap" title="AVWAP" onclick="Drawing.setTool('avwap')"><i class="fas fa-water"></i></button>
+              <div class="dt-separator"></div>
+              <button class="dt-item" id="tool-measure" title="Measure" onclick="Drawing.setTool('measure')"><i class="fas fa-ruler-combined"></i></button>
+              <button class="dt-item" id="tool-clear" title="Clear All" onclick="Drawing.clear()"><i class="fas fa-trash-alt"></i></button>
+            </div>
+
+            <div id="chart-container">
+              <div class="chart-loading" id="chart-loading"><div class="spinner"></div></div>
+              <div class="crosshair-info" id="crosshair-info"></div>
+              
+              <div id="price-axis-widget" class="price-axis-widget">
+                <span id="paw-price" class="paw-price">—</span>
+                <span id="paw-timer" class="paw-timer">00:00</span>
+              </div>
+
+              <button id="btn-scroll-recent" class="scroll-recent-btn" title="Scroll to Recent" onclick="ChartModule.scrollToRecent()">
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
+
+            <!-- Multi-Chart Overlay (Hidden by default) -->
+            <div id="multi-chart-overlay" style="position:absolute; inset:0; background:var(--bg-primary); z-index:100; display:none;"></div>
+          </div>
+      </main>
+
+      <!-- Right Panel (Context-Aware Insights) -->
+      <aside class="inspector-panel collapsed" id="inspector-panel">
+        <div id="watchlist-view" class="inspector-view active">
+          <div class="inspector-header">
+            <h3>Watchlist</h3>
+            <div style="display:flex; gap:8px;">
+              <button id="btn-add-watchlist" class="btn-icon" title="Add Symbol"><i class="fas fa-plus"></i></button>
+              <button class="btn-icon btn-close-panel" title="Close Watchlist" onclick="App.closeInspector()"><i class="fas fa-times"></i></button>
+            </div>
+          </div>
+          <div id="watchlist-search-container" class="search-box-container" style="display:none; padding:12px; border-bottom:1px solid var(--border-color);">
+             <input type="text" id="watchlist-search-input" placeholder="Search symbol..." style="width:100%; height:32px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:white; padding:0 10px; font-size:12px; outline:none;" />
+             <div id="watchlist-search-results" class="search-results-popover"></div>
+          </div>
+          <div class="watchlist-items" id="watchlist-items"></div>
+        </div>
+
+        <div id="papertrade-view" class="inspector-view">
+          <div id="pt-root" style="display:flex; flex-direction:column; height:100%; overflow:hidden;"></div>
+        </div>
+
+        <div id="dashboard-view" class="inspector-view">
+          <div class="inspector-header">
+            <h3>Dashboard</h3>
+            <button class="btn-icon btn-close-panel" title="Close Panel" onclick="App.closeInspector()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="analytics-content" id="analytics-content">
+             <div class="analytics-placeholder">Select a symbol to view insights</div>
+          </div>
+        </div>
+
+        <div id="indicators-view" class="inspector-view">
+          <div class="inspector-header">
+            <h3>Indicators</h3>
+            <button class="btn-icon btn-close-panel" id="indicator-panel-close" onclick="App.closeInspector()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="indicator-search-box" style="padding:12px; border-bottom:1px solid var(--border-color); flex-shrink:0;">
+            <input type="text" id="indicator-search" placeholder="Search technicals..." style="width:100%; height:32px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:white; padding:0 10px; font-size:12px; outline:none;" />
+          </div>
+          <div class="indicator-list" id="indicator-list" style="flex:1; overflow-y:auto; padding:12px;"></div>
+          <div id="active-indicators-list" class="active-indicators-list" style="padding:10px; border-top:1px solid var(--border-color); max-height: 150px; overflow-y:auto; flex-shrink:0;"></div>
+        </div>
+
+        <div id="patterns-view" class="inspector-view">
+          <div class="inspector-header">
+            <h3>Patterns</h3>
+            <div style="display:flex; gap:8px;">
+              <button class="btn-icon" title="Settings" onclick="PatternSettings.open()"><i class="fas fa-cog"></i></button>
+              <button class="btn-icon" title="Refresh" onclick="App.refreshPatterns()"><i class="fas fa-sync-alt"></i></button>
+              <button class="btn-icon btn-close-panel" title="Close Panel" onclick="App.closeInspector()"><i class="fas fa-times"></i></button>
+            </div>
+          </div>
+          <div class="patterns-panel" id="patterns-list">
+            <div class="analytics-placeholder">Scanning chart patterns...</div>
+          </div>
+        </div>
+
+        <div id="optionchain-view" class="inspector-view">
+        </div>
+
+        <div id="learning-view" class="inspector-view">
+          <div class="inspector-header">
+            <h3>Student Path</h3>
+            <button class="btn-icon btn-close-panel" title="Close Panel" onclick="App.closeInspector()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="inspector-content" id="learning-center-root">
+            <div class="analytics-placeholder">Loading lessons...</div>
+          </div>
+        </div>
+
+        <div id="alerts-view" class="inspector-view">
+          <div class="inspector-header">
+            <h3>Alerts</h3>
+            <button id="btn-create-alert" class="btn-icon"><i class="fas fa-plus"></i></button>
+          </div>
+          <div id="alerts-container" class="inspector-content">
+            <p class="empty-msg">No alerts set.</p>
+          </div>
+        </div>
+
+        <div id="market-view" class="inspector-view">
+          <div class="inspector-header">
+            <h3>Market Overview</h3>
+            <button class="btn-icon" onclick="MarketUI.refreshOverview()"><i class="fas fa-sync-alt"></i></button>
+          </div>
+          <div class="inspector-content" id="mu-overview-body">
+            <div class="mu-empty">Loading market overview…</div>
+          </div>
+        </div>
+
+        <div id="ipos-view" class="inspector-view">
+          <div class="inspector-header">
+            <h3>IPO Tracker</h3>
+            <button class="btn-icon" onclick="MarketUI.refreshIpos()"><i class="fas fa-sync-alt"></i></button>
+          </div>
+          <div class="inspector-content" id="mu-ipo-body">
+            <div class="mu-empty">Loading IPO tracker…</div>
+          </div>
+        </div>
+
+        <div id="strategy-view" class="inspector-view">
+          <div class="inspector-header">
+            <h3>Strategy</h3>
+            <button class="btn-icon" onclick="StrategyBuilder.reset()"><i class="fas fa-sync-alt"></i></button>
+          </div>
+          <div id="strategy-builder-container" class="inspector-content"></div>
+        </div>
+
+        <div id="screener-view" class="inspector-view">
+          <div class="inspector-header">
+            <h3>Screener</h3>
+            <button class="btn-icon" onclick="Screener.refresh()"><i class="fas fa-sync-alt"></i></button>
+          </div>
+          <div class="inspector-content">
+            <div class="screener-filters" style="padding:12px; background:var(--bg-tertiary); border-radius:8px; margin-bottom:15px;">
+              <div class="form-group" style="margin-bottom:12px;">
+                <label style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Price Range</label>
+                <div style="display:flex; gap:8px; margin-top:4px;">
+                  <input type="number" id="scr-min-price" placeholder="Min" style="flex:1; height:30px; background:var(--bg-primary); border:1px solid var(--border-color); color:white; border-radius:4px; padding:0 8px; font-size:12px;">
+                  <input type="number" id="scr-max-price" placeholder="Max" style="flex:1; height:30px; background:var(--bg-primary); border:1px solid var(--border-color); color:white; border-radius:4px; padding:0 8px; font-size:12px;">
+                </div>
+              </div>
+              <button id="btn-run-screener" class="btn-primary" style="width:100%; height:36px; font-weight:700;">RUN SCAN</button>
+            </div>
+            <div class="results-container">
+              <table class="screener-table" style="width:100%; font-size:12px;">
+                <thead>
+                  <tr style="color:var(--text-muted); text-align:left;">
+                    <th style="padding:8px 0;">Sym</th>
+                    <th style="padding:8px 0;">Price</th>
+                    <th style="padding:8px 0;">Chg%</th>
+                  </tr>
+                </thead>
+                <tbody id="screener-results">
+                  <tr><td colspan="3" class="empty-msg">Run a scan to see results</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="ai-view" class="inspector-view">
+          <div class="inspector-header">
+            <h3>Educational Model Lab</h3>
+            <button class="btn-icon" onclick="AIAnalyst.refresh()"><i class="fas fa-sync-alt"></i></button>
+          </div>
+          <div class="inspector-content" id="ai-analysis-container">
+            <div class="analytics-placeholder">Open model scores for educational review.</div>
+          </div>
+        </div>
+
+        <div id="account-view" class="inspector-view">
+          <div class="inspector-header">
+            <h3>Account</h3>
+            <button class="btn-icon btn-close-panel" title="Close Panel" onclick="App.closeInspector()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="inspector-content" id="subscription-root">
+            <div class="analytics-placeholder">Loading account...</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Notification inbox (toggled by the bell button) -->
+    <div id="mu-inbox-panel">
+      <div class="mu-inbox-header">
+        <h4><i class="fas fa-bell"></i> Notifications</h4>
+        <div>
+          <button class="btn-icon" title="Mark all read" onclick="MarketUI.markAllRead()"><i class="fas fa-check-double"></i></button>
+          <button class="btn-icon" title="Close" onclick="document.getElementById('mu-inbox-panel').style.display='none'"><i class="fas fa-times"></i></button>
+        </div>
+      </div>
+      <div id="mu-inbox"><div class="mu-empty">No notifications.</div></div>
+      <div id="mu-prefs" class="mu-prefs"></div>
+    </div>
+
+    <!-- Fibonacci Settings Dialog -->
+    <div id="fib-settings-dialog" class="custom-dialog" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:8px; z-index:20000; width:320px; box-shadow:0 10px 30px rgba(0,0,0,0.5); padding:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid var(--border-color); padding-bottom:10px;">
+            <h4 style="margin:0; font-size:14px; color:var(--accent-blue);">Fibonacci Retracement</h4>
+            <button class="btn-icon" onclick="document.getElementById('fib-settings-dialog').style.display='none'"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="fib-levels-container" style="max-height:300px; overflow-y:auto; margin-bottom:15px;"></div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+            <label style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer;">
+                <input type="checkbox" id="fib-show-diagonal" checked /> Show Diagonal
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer;">
+                <input type="checkbox" id="fib-extend-lines" checked /> Extend Lines
+            </label>
+        </div>
+        <div style="margin-top:20px; display:flex; gap:10px;">
+            <button class="btn-primary" onclick="Drawing.applyFibSettings()" style="flex:1; height:36px;">Apply</button>
+            <button class="btn-secondary" onclick="document.getElementById('fib-settings-dialog').style.display='none'" style="flex:1; height:36px;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Indicator Settings Dialog -->
+    <div id="ind-settings-dialog" class="custom-dialog" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:8px; z-index:20000; width:320px; box-shadow:0 10px 30px rgba(0,0,0,0.5); padding:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid var(--border-color); padding-bottom:10px;">
+            <h4 id="ind-settings-title" style="margin:0; font-size:14px; color:var(--accent-blue);">Indicator Settings</h4>
+            <button class="btn-icon" onclick="document.getElementById('ind-settings-dialog').style.display='none'"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="settings-container" id="ind-settings-container" style="margin-bottom:15px; max-height:300px; overflow-y:auto;">
+            <!-- Dynamic fields will be injected here -->
+        </div>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn-primary" id="ind-apply-btn" style="flex:1; height:36px; font-weight:600; cursor:pointer;">Apply</button>
+            <button class="btn-secondary" onclick="document.getElementById('ind-settings-dialog').style.display='none'" style="flex:1; height:36px; font-weight:600; cursor:pointer;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <footer class="status-bar">
+      <div class="sb-item" id="status-symbol"><span></span></div>
+      <div class="sb-item"><i class="far fa-clock"></i> <span id="status-interval-label"></span></div>
+      <div style="flex:1;"></div>
+      <div class="sb-item"><a href="/privacy" target="_blank" rel="noopener" style="color:var(--text-muted);">Privacy</a></div>
+      <div class="sb-item"><a href="/terms" target="_blank" rel="noopener" style="color:var(--text-muted);">Terms</a></div>
+      <div class="sb-item" style="color:var(--accent-green);"><i class="fas fa-server"></i> <span id="status-data-source">Live</span></div>
+    </footer>
+  </div>
+
+  <!-- App Scripts -->
+  <script src="js/datafeed.js?v=5"></script>
+  <script src="js/search.js?v=3"></script>
+  <script src="js/chart.js?v=11"></script>
+  <script src="js/indicators.js?v=5"></script>
+  <script src="js/dashboard.js?v=4"></script>
+  <script src="js/drawing_engine.js?v=3"></script>
+  <script src="js/fibonacci.js?v=3"></script>
+  <script src="js/multi_chart.js?v=4"></script>
+  <script src="js/strategy_builder.js?v=3"></script>
+  <script src="js/backtester.js?v=3"></script>
+  <script src="js/alerts.js?v=3"></script>
+  <script src="js/screener.js?v=3"></script>
+  <script src="js/paper_trade.js?v=4"></script>
+  <script src="js/pattern_settings.js?v=1"></script>
+  <script src="js/pattern_panel.js?v=1"></script>
+  <script src="js/option_chain.js?v=17"></script>
+  <script src="js/pattern_engine.js?v=1"></script>
+  <script src="js/learning_center.js?v=1"></script>
+  <script src="js/subscription.js?v=1"></script>
+  <script src="js/futures_analytics.js?v=3"></script>
+  <script src="js/ai_risk_assistant.js?v=3"></script>
+  <link rel="stylesheet" href="css/watchlist_baskets.css?v=7">
+  <script src="js/watchlist_baskets.js?v=12"></script>
+  <script src="js/market_ui.js?v=2"></script>
+  <script src="js/app.js?v=20"></script>
+  
+  <script src="js/ai_analyst.js?v=3"></script>
+  <script>
+    // Initial Boot Sequence
+    (function() {
+      const ls = document.getElementById('loading-screen');
+      if(ls) ls.classList.add('active'); // Show only on boot
+    })();
+
+    function clearOverlays() {
+      const ls = document.getElementById('loading-screen');
+      if(ls) {
+          ls.style.opacity = '0';
+          setTimeout(() => {
+              ls.classList.remove('active');
+              ls.classList.add('hidden');
+          }, 400);
+      }
+      const cl = document.getElementById('chart-loading');
+      if(cl) cl.classList.remove('active');
+    }
+    window.addEventListener('load', () => setTimeout(clearOverlays, 800));
+  </script>
+  
+  <script>
+    // Essential Micro-interactions
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // Ripple Effect
+        const applyRipple = (selector) => {
+            document.querySelectorAll(selector).forEach(btn => {
+                btn.addEventListener('mousedown', function(e) {
+                    let ripple = document.createElement('span');
+                    ripple.classList.add('ripple');
+                    this.appendChild(ripple);
+                    let rect = this.getBoundingClientRect();
+                    ripple.style.left = `${e.clientX - rect.left}px`;
+                    ripple.style.top = `${e.clientY - rect.top}px`;
+                    setTimeout(() => ripple.remove(), 600);
+                    this.classList.add('flash-pulse');
+                    setTimeout(() => this.classList.remove('flash-pulse'), 300);
+                });
+            });
+        };
+        applyRipple('.btn-primary, .btn-secondary, .top-bar-btn, .sidebar-item, .dt-item');
+
+        // Quote Price Flash Animation Hook
+        const quoteEl = document.getElementById('quote-price');
+        if(quoteEl) {
+            let lastVal = 0;
+            const observer = new MutationObserver(() => {
+                const val = parseFloat(quoteEl.textContent.replace(/,/g, ''));
+                if(!isNaN(val)) {
+                    quoteEl.classList.remove('flash-up', 'flash-down');
+                    void quoteEl.offsetWidth; // trigger reflow
+                    quoteEl.classList.add(val >= lastVal ? 'flash-up' : 'flash-down');
+                    lastVal = val;
+                }
+            });
+            observer.observe(quoteEl, { childList: true, characterData: true, subtree: true });
+        }
+    });
+  </script>
+</body>
+</html>

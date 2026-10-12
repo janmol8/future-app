@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Future Chart Student Premium</title>
+  <link rel="stylesheet" href="css/style.css?v=6">
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+  <main style="max-width:760px; margin:40px auto; padding:24px;">
+    <div class="pricing-card active" style="margin:0;">
+      <div class="learning-kicker">Web Subscription</div>
+      <h1>Student Premium</h1>
+      <div class="plan-price">₹299/month</div>
+      <p style="color:var(--text-secondary); line-height:1.6;">
+        Unlock lessons, advanced backtesting, optional AI commentary, and progress tracking.
+        This is an educational simulator subscription only. It is not investment advice.
+      </p>
+      <div id="checkout-auth" class="auth-form" style="margin-top:18px;">
+        <input id="email" type="email" placeholder="Email" autocomplete="email">
+        <input id="password" type="password" placeholder="Password" autocomplete="current-password">
+        <div class="auth-actions">
+          <button class="btn-secondary" onclick="login()">Login</button>
+          <button class="btn-secondary" onclick="register()">Register</button>
+        </div>
+      </div>
+      <button id="pay-btn" class="btn-primary" style="width:100%; height:44px; margin-top:16px;" onclick="startPayment()" disabled>
+        Login to Continue
+      </button>
+      <p id="status" style="color:var(--text-muted); font-size:12px; margin-top:12px;"></p>
+    </div>
+    <p style="margin-top:20px;"><a href="/">Back to app</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a></p>
+  </main>
+  <script>
+    let me = null;
+
+    async function refreshMe() {
+      me = await fetch('/api/auth/me').then(r => r.json());
+      const btn = document.getElementById('pay-btn');
+      const auth = document.getElementById('checkout-auth');
+      if (me.authenticated) {
+        auth.style.display = 'none';
+        btn.disabled = false;
+        btn.textContent = me.subscription?.active ? 'Premium Active' : 'Pay with UPI / Razorpay';
+      } else {
+        auth.style.display = 'flex';
+        btn.disabled = true;
+        btn.textContent = 'Login to Continue';
+      }
+    }
+
+    function credentials() {
+      return {
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value
+      };
+    }
+
+    async function auth(url) {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(credentials())
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || 'Authentication failed');
+      await refreshMe();
+    }
+
+    async function login() {
+      try { await auth('/api/auth/login'); setStatus('Logged in. You can pay now.'); }
+      catch (e) { setStatus(e.message, true); }
+    }
+
+    async function register() {
+      try { await auth('/api/auth/register'); setStatus('Registered. You can pay now.'); }
+      catch (e) { setStatus(e.message, true); }
+    }
+
+    async function startPayment() {
+      try {
+        const res = await fetch('/api/subscription/razorpay/order', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({plan_id: 'student_premium'})
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Could not create order');
+        const options = {
+          key: data.key_id,
+          amount: data.order.amount,
+          currency: data.order.currency,
+          name: 'Future Chart',
+          description: 'Student Premium - educational simulator',
+          order_id: data.order.id,
+          prefill: { email: me.user.email },
+          notes: { user_id: me.user.id, plan_id: 'student_premium' },
+          handler: async function (response) {
+            setStatus('Payment received. Verifying...');
+            const verify = await fetch('/api/subscription/razorpay/verify', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({...response, plan_id: 'student_premium'})
+            }).then(r => r.json());
+            if (verify.success) {
+              setStatus('Premium is active. You can return to the app.');
+              await refreshMe();
+            } else {
+              setStatus('Payment captured, waiting for webhook confirmation.', false);
+            }
+          },
+          theme: { color: '#2962FF' }
+        };
+        new Razorpay(options).open();
+      } catch (e) {
+        setStatus(e.message, true);
+      }
+    }
+
+    function setStatus(msg, error=false) {
+      const el = document.getElementById('status');
+      el.textContent = msg;
+      el.style.color = error ? 'var(--accent-red)' : 'var(--text-muted)';
+    }
+
+    refreshMe();
+  </script>
+</body>
+</html>

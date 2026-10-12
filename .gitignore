@@ -1,0 +1,39 @@
+# Local secrets
+.env
+.env.*
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Runtime/local data
+.startup/
+backend/yf_cache/
+backend/data/
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+backend/trade_log.txt
+
+# Log files (large, machine-generated)
+*.log
+*.log*
+
+# Node
+node_modules/
+npm-debug.log*
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+.vercel
+.env*

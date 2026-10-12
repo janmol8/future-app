@@ -1,0 +1,11 @@
+{
+    "default": {
+        "balance": 1000000,
+        "initial_balance": 1000000,
+        "positions": {},
+        "orders": [],
+        "trade_history": [],
+        "pnl_history": [],
+        "created_at": 1781289895
+    }
+}
