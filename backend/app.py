@@ -2207,7 +2207,7 @@ def start_market_runtime():
 
 if __name__ == "__main__":
     host = os.getenv("APP_HOST", "127.0.0.1")
-    port = int(os.getenv("APP_PORT", "5000"))
+    port = int(os.getenv("PORT", os.getenv("APP_PORT", "5000")))
     requested_debug = os.getenv("FLASK_DEBUG", "").lower() in {"1", "true", "yes", "on"}
     local_hosts = {"127.0.0.1", "localhost", "::1"}
     debug = requested_debug and host in local_hosts
