@@ -13,3 +13,4 @@ xgboost>=2.0.0
 joblib>=1.3.0
 pytest
 pytest-timeout
+waitress>=2.1.0

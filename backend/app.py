@@ -2208,10 +2208,8 @@ def start_market_runtime():
 if __name__ == "__main__":
     host = os.getenv("APP_HOST", "0.0.0.0")
     port = int(os.getenv("PORT", os.getenv("APP_PORT", "5000")))
-    # Vercel containers may run as non-root and cannot bind to privileged ports (<1024).
-    # If PORT is set to a privileged port, fall back to 5000 and log clearly.
     if port < 1024:
-        logger.warning("PORT=%d is a privileged port; non-root containers cannot bind. Falling back to 5000.", port)
+        logger.warning("PORT=%d is privileged; non-root containers cannot bind. Falling back to 5000.", port)
         port = 5000
     requested_debug = os.getenv("FLASK_DEBUG", "").lower() in {"1", "true", "yes", "on"}
     local_hosts = {"127.0.0.1", "localhost", "::1"}
@@ -2219,8 +2217,15 @@ if __name__ == "__main__":
     if requested_debug and not debug:
         logger.warning("Refusing to enable Flask debug mode on non-local host %s", host)
     start_market_runtime()
-    try:
-        app.run(host=host, port=port, debug=debug, threaded=True)
-    except OSError as exc:
-        logger.error("Failed to bind to %s:%d: %s", host, port, exc)
-        raise
+    if host in local_hosts and debug:
+        # Local development: Flask dev server with reloader.
+        app.run(host=host, port=port, debug=True, threaded=True)
+    else:
+        # Production (Vercel containers, VPS, etc.): use Waitress.
+        try:
+            from waitress import serve
+        except ImportError:
+            logger.error("waitress not installed; install it with: pip install waitress")
+            sys.exit(1)
+        logger.info("Starting Waitress WSGI server on %s:%d", host, port)
+        serve(app, host=host, port=port, threads=4, channels=4)
